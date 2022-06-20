@@ -57,6 +57,9 @@
 
 #include "scancontext/Scancontext.h"
 
+#include "std_msgs/Int8.h"
+
+
 using namespace gtsam;
 
 using std::cout;
@@ -128,6 +131,7 @@ double recentOptimizedY = 0.0;
 ros::Publisher pubMapAftPGO, pubOdomAftPGO, pubPathAftPGO;
 ros::Publisher pubLoopScanLocal, pubLoopSubmapLocal;
 ros::Publisher pubOdomRepubVerifier;
+ros::Publisher pubLoopDetected;
 
 std::string save_directory;
 std::string pgKITTIformat, pgScansDirectory, pgSCDsDirectory;
@@ -720,7 +724,13 @@ void performSCLoopClosure(void)
         const int prev_node_idx = SCclosestHistoryFrameID;
         const int curr_node_idx = keyframePoses.size() - 1; // because cpp starts 0 and ends n-1
         cout << "Loop detected! - between " << prev_node_idx << " and " << curr_node_idx << "" << endl;
-
+	
+	if (prev_node_idx<10){
+            std_msgs::Int8 loop_detected_flag;
+            loop_detected_flag.data = 1;
+            pubLoopDetected.publish(loop_detected_flag);
+        }
+	    
         mBuf.lock();
         scLoopICPBuf.push(std::pair<int, int>(prev_node_idx, curr_node_idx));
         // addding actual 6D constraints in the other thread, icp_calculation.
@@ -901,6 +911,8 @@ int main(int argc, char **argv)
 	pubOdomRepubVerifier = nh.advertise<nav_msgs::Odometry>("/repub_odom", 100);
 	pubPathAftPGO = nh.advertise<nav_msgs::Path>("/aft_pgo_path", 100);
 	pubMapAftPGO = nh.advertise<sensor_msgs::PointCloud2>("/aft_pgo_map", 100);
+	
+	pubLoopDetected = nh.advertise<std_msgs::Int8>("/loop_detected", 100);
 
 	pubLoopScanLocal = nh.advertise<sensor_msgs::PointCloud2>("/loop_scan_local", 100);
 	pubLoopSubmapLocal = nh.advertise<sensor_msgs::PointCloud2>("/loop_submap_local", 100);
