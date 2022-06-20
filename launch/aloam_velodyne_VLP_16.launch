@@ -26,6 +26,9 @@
     <param name="lidar_type" type="string" value="VLP16"/> 
     <remap from="/velodyne_points" to="/velodyne_points"/>
     
+     <!-- utils -->
+    <param name="save_directory" type="string" value="/home/user/catkin_ws/src/SC-A-LOAM-main/utils/data/"/>  <!-- CHANGE THIS with your folder path and end with / -->
+    
     <!-- nodes -->
     <node pkg="aloam_velodyne" type="ascanRegistration" name="ascanRegistration" output="screen" />
     <node pkg="aloam_velodyne" type="alaserOdometry" name="alaserOdometry" output="screen" />
